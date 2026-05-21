@@ -32,8 +32,8 @@ var (
 )
 
 type (
-	PE     struct{}
-	PEFile struct {
+	PE   struct{}
+	File struct {
 		Bytes []byte
 		PE    pe.File
 	}
@@ -124,8 +124,8 @@ type SectionHeader32X28 struct {
 	NumberOfLineNumbers  uint16
 }
 
-func (p *PE) Open(path string) (*PEFile, error) {
-	data := &PEFile{}
+func (p *PE) Open(path string) (*File, error) {
+	data := &File{}
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -228,7 +228,7 @@ func (p *PE) SHEntryOffset(s []byte, address int) (int, error) {
 	return off + COFFStartBytesLen + COFFHeaderSize + OH64ByteSize + DataDirSize + address, nil
 }
 
-func (p *PE) SectionBytes(file *PEFile, sectionVirtualAddress, sectionSize uint32) ([]byte, error) {
+func (p *PE) SectionBytes(file *File, sectionVirtualAddress, sectionSize uint32) ([]byte, error) {
 	var s *pe.Section
 
 	for _, section := range file.PE.Sections {
