@@ -35,6 +35,11 @@ type File[T any] struct {
 	Content []byte
 }
 
+type WalkDirOptions struct {
+	Relative bool
+	Dirs     bool
+}
+
 func JOAAT(s string) uint32 {
 	var h uint32
 	for i := range len(s) {
@@ -50,20 +55,33 @@ func JOAAT(s string) uint32 {
 	return h
 }
 
-func Packx(entries []File[string], prefix string, embed bool) ([]byte, []byte) {
-	b := Pack(entries, prefix, embed)
-
-	var sb strings.Builder
-
-	for _, e := range entries {
-		path := prefix + e.Path
-		fmt.Fprintf(&sb, "%08x:%s\n", JOAAT(path), path)
+func PackFiles(input, output, prefix string, embed bool) error {
+	entries, err := walkDir(input, &WalkDirOptions{
+		Relative: true,
+		Dirs:     false,
+	})
+	if err != nil {
+		return err
 	}
 
-	return b, []byte(sb.String())
+	data := Pack(*entries, prefix, embed)
+	if err := os.WriteFile(output, data, 0o644); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(output+".manifest", Manifest(*entries, prefix), 0o644); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func Unpackx(data []byte, output string, flat bool) error {
+func UnpackFiles(input, output string, flat bool) error {
+	data, err := os.ReadFile(input)
+	if err != nil {
+		return err
+	}
+
 	entries, err := Unpack(data)
 	if err != nil {
 		return err
@@ -137,6 +155,17 @@ func Unpack(data []byte) ([]File[string], error) {
 	})
 
 	return files, err
+}
+
+func Manifest(entries []File[string], prefix string) []byte {
+	var sb strings.Builder
+
+	for _, e := range entries {
+		path := prefix + e.Path
+		fmt.Fprintf(&sb, "%08x:%s\n", JOAAT(path), path)
+	}
+
+	return []byte(sb.String())
 }
 
 func AppendEntry(dst []byte, archivePath string, content []byte) []byte {
@@ -543,6 +572,45 @@ func UnpackI64DynBP(data []byte, offset int) (int64, int, error) {
 	}
 
 	return unsignedToSignedB(u), offset, nil
+}
+
+func walkDir(name string, opts *WalkDirOptions) (*[]File[string], error) {
+	name = filepath.Clean(name)
+	result := []File[string]{}
+
+	err := filepath.WalkDir(name, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !opts.Dirs && d.IsDir() {
+			return nil
+		}
+
+		rel := path
+		if opts.Relative {
+			if rel, err = filepath.Rel(name, path); err != nil {
+				return err
+			}
+		}
+
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		result = append(result, File[string]{
+			Path:    filepath.ToSlash(rel),
+			Content: data,
+		})
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func subpath(src, dst string) bool {
