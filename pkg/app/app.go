@@ -28,7 +28,7 @@ func New(name, buildDate, gitHash, buildOn, onStart string) *App {
 }
 
 func (app *App) Usage() {
-	app.logFn(emptyStr(app.OnStart))
+	app.logFn(empty(app.OnStart))
 	app.flagSet.PrintDefaults()
 }
 
@@ -42,14 +42,14 @@ func (app *App) Init(logFn func(format string, a ...any), arguments []string) {
 	app.flagSet.Parse(arguments)
 
 	if app.versionFlag {
-		app.logFn("%s-%s\n", emptyStr(app.Name), emptyStr(app.GitHash))
-		app.logFn("Build date: %s\n", emptyStr(app.BuildDate))
-		app.logFn("Build on: %s\n", emptyStr(app.BuildOn))
+		app.logFn("%s-%s\n", empty(app.Name), empty(app.GitHash))
+		app.logFn("Build date: %s\n", empty(app.BuildDate))
+		app.logFn("Build on: %s\n", empty(app.BuildOn))
 		os.Exit(0)
 	}
 }
 
-func emptyStr(str string) string {
+func empty(str string) string {
 	if str == "" {
 		return "<none>"
 	}
