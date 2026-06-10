@@ -136,7 +136,7 @@ func UTF16(value []byte, start, end int) string {
 	}
 
 	raw := value[start:end]
-	u16 := ((*[1 << 30]uint16)(unsafe.Pointer(&raw[0])))[:len(raw)/2]
+	u16 := (*[1 << 30]uint16)(unsafe.Pointer(&raw[0]))[:len(raw)/2]
 	ind := -1
 
 	for i, c := range u16 {

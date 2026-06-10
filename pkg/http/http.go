@@ -30,21 +30,15 @@ const (
 
 func Header(w http.ResponseWriter, key HeaderKey, value string) { set(w, string(key), value) }
 
-func NoSniff(
-	w http.ResponseWriter,
-) {
+func NoSniff(w http.ResponseWriter) {
 	set(w, string(HeaderXContentTypeOptions), "nosniff")
 }
 
-func DenyFrame(
-	w http.ResponseWriter,
-) {
+func DenyFrame(w http.ResponseWriter) {
 	set(w, string(HeaderXFrameOptions), "DENY")
 }
 
-func NoContent(
-	w http.ResponseWriter,
-) {
+func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
 

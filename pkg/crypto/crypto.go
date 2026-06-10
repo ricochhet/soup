@@ -243,7 +243,8 @@ func (m *digestX64_128) Sum(in []byte) []byte {
 	h1, h2 := m.processTail()
 	h1, h2 = final(h1, h2, uint64(m.tlen))
 
-	return append(in,
+	return append(
+		in,
 		byte(h1>>0), byte(h1>>8), byte(h1>>16), byte(h1>>24),
 		byte(h1>>32), byte(h1>>40), byte(h1>>48), byte(h1>>56),
 		byte(h2>>0), byte(h2>>8), byte(h2>>16), byte(h2>>24),
@@ -256,7 +257,8 @@ func (m *digestX86_32) Sum(in []byte) []byte {
 	h1 ^= uint32(m.tlen)
 	h1 = fmix32(h1)
 
-	return append(in,
+	return append(
+		in,
 		byte(h1>>0), byte(h1>>8), byte(h1>>16), byte(h1>>24),
 	)
 }
@@ -265,7 +267,8 @@ func (m *digestX86_128) Sum(in []byte) []byte {
 	h := m.processTail()
 	h = finalX86_128(h, uint32(m.tlen))
 
-	return append(in,
+	return append(
+		in,
 		byte(h[0]>>0), byte(h[0]>>8), byte(h[0]>>16), byte(h[0]>>24),
 		byte(h[1]>>0), byte(h[1]>>8), byte(h[1]>>16), byte(h[1]>>24),
 		byte(h[2]>>0), byte(h[2]>>8), byte(h[2]>>16), byte(h[2]>>24),
