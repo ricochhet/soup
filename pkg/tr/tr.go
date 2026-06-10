@@ -70,7 +70,7 @@ func (l *Localization) GetFromLocale(name, key string) (string, bool) {
 		return translation[key], ok
 	}
 
-	return "<none>", ok
+	return "", ok
 }
 
 func (l *Localization) Set(key, value string) bool { return l.SetFromLocale(l.l, key, value) }
