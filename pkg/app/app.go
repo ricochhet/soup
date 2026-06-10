@@ -32,14 +32,17 @@ func (app *App) Usage() {
 	app.flagSet.PrintDefaults()
 }
 
-func (app *App) Init(logFn func(format string, a ...any), arguments []string) {
+func (app *App) Init(logFn func(format string, a ...any), arguments []string) error {
 	app.logFn = logFn
 	app.flagSet = flag.NewFlagSet("app", flag.ExitOnError)
 
 	app.flagSet.BoolVar(&app.versionFlag, "version", false, "show version")
 	app.flagSet.BoolVar(&app.versionFlag, "v", false, "show version")
 	app.flagSet.Usage = app.Usage
-	app.flagSet.Parse(arguments)
+
+	if err := app.flagSet.Parse(arguments); err != nil {
+		return err
+	}
 
 	if app.versionFlag {
 		app.logFn("%s-%s\n", empty(app.Name), empty(app.GitHash))
@@ -47,6 +50,8 @@ func (app *App) Init(logFn func(format string, a ...any), arguments []string) {
 		app.logFn("Build on: %s\n", empty(app.BuildOn))
 		os.Exit(0)
 	}
+
+	return nil
 }
 
 func empty(str string) string {
